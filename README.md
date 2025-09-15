@@ -1,36 +1,254 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Socratic AI Chat Application
 
-## Getting Started
+A modern, full-stack chat application that uses AI to conduct Socratic dialogues, helping users explore complex questions through guided questioning rather than providing direct answers.
 
-First, run the development server:
+## 🎯 Project Overview
 
+The Socratic AI Chat Application employs the Socratic method of learning through inquiry. Instead of giving direct answers, the AI asks probing questions that guide users to discover insights and develop deeper understanding of complex topics.
+
+### Core Features
+
+- **🤖 AI-Powered Socratic Dialogue**: AI asks probing questions to help users discover insights
+- **🔄 Model Switching**: Users can switch between different AI models (GPT-4, Claude, etc.)
+- **💾 Persistent Sessions**: Conversations are saved and can be resumed
+- **📈 Question Evolution Tracking**: System tracks how questions evolve and deepen during dialogue
+- **⚡ Streaming Responses**: Real-time display of AI responses as they generate
+
+## 🛠 Tech Stack
+
+### Frontend
+- **Framework**: Next.js 15 with App Router
+- **React**: React 19 with modern hooks and patterns
+- **TypeScript**: Strict mode with comprehensive type safety
+- **Styling**: Tailwind CSS 4 with custom design tokens
+- **UI Components**: shadcn/ui component system
+- **Icons**: Lucide React icon library
+
+### Backend
+- **API**: Next.js API routes
+- **Database**: PostgreSQL (planned)
+- **AI Integration**: Multiple AI API providers (OpenAI, Anthropic)
+
+### Development & Testing
+- **Testing**: Jest 30 with React Testing Library
+- **Code Quality**: ESLint with Next.js and TypeScript rules
+- **Development Methodology**: Strict Test-Driven Development (TDD)
+- **Path Aliases**: Clean imports with `@/` prefix
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn package manager
+- Git
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone git@github.com:Sob7i/socratic-dialogue-ai.git
+   cd socratic-dialogue-ai
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📋 Available Scripts
+
+### Development
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev          # Start development server
+npm run build        # Create production build
+npm run start        # Start production server
+npm run lint         # Run ESLint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Testing
+```bash
+npm run test         # Run tests
+npm test -- --watch # Run tests in watch mode
+npm test -- --coverage # Run tests with coverage
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧪 Test-Driven Development (TDD)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project follows **strict TDD methodology**:
 
-## Learn More
+1. **🔴 RED**: Write failing tests first
+2. **🟢 GREEN**: Write minimal code to make tests pass
+3. **🔵 REFACTOR**: Improve code while keeping tests green
 
-To learn more about Next.js, take a look at the following resources:
+### TDD Workflow
+- Tests must be written before implementation
+- No implementation code without corresponding tests
+- Follow the Red-Green-Refactor cycle
+- Comprehensive test coverage for all scenarios
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See [TDD Workflow Guide](.claude/workflows/tdd-cycle.md) for detailed instructions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 Project Structure
 
-## Deploy on Vercel
+```
+socratic-dialogue-ai/
+├── src/
+│   ├── app/                 # Next.js App Router pages
+│   ├── components/          # React components
+│   │   └── ConversationView/
+│   │       ├── ConversationView.tsx
+│   │       ├── ConversationView.test.tsx
+│   │       └── index.ts
+│   └── lib/                 # Utility functions
+├── artifacts/               # Session documentation
+│   ├── sessions/           # Development session records
+│   ├── decisions/          # Technical decision logs
+│   └── research/           # Research and analysis
+├── .claude/                # Claude AI assistant context
+│   ├── prompts/           # Context and requirements
+│   ├── commands/          # Development commands
+│   ├── workflows/         # Development workflows
+│   └── guidelines/        # Code style and conventions
+├── public/                 # Static assets
+└── docs/                  # Additional documentation
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Component Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Component Structure
+Each component follows this pattern:
+```
+ComponentName/
+├── ComponentName.tsx      # Main component
+├── ComponentName.test.tsx # Test suite
+└── index.ts              # Export file
+```
+
+### Creating New Components
+1. Create component directory and test file first
+2. Write comprehensive tests covering all scenarios
+3. Implement minimal code to pass tests
+4. Refactor and improve while keeping tests green
+
+See [Code Style Guidelines](.claude/guidelines/code-style.md) for detailed patterns.
+
+## 🤖 AI Assistant Integration
+
+This project includes comprehensive Claude AI assistant integration:
+
+- **CLAUDE.md**: Complete project context and guidelines
+- **Development Commands**: Pre-configured development workflows
+- **TDD Guidelines**: Strict test-driven development patterns
+- **Code Style**: Consistent coding standards and patterns
+
+## 📊 Session Artifacts
+
+The project maintains detailed documentation of each development session:
+
+### Session Management
+```bash
+# Start new session
+start_session "feature-name"
+
+# End session and commit artifacts
+end_session "feature-name"
+```
+
+### Artifact Structure
+- **Session Summary**: Overview of work completed
+- **Commits**: Detailed commit history and analysis
+- **Decisions**: Technical decisions and rationale
+- **Files Created**: Documentation of new files and changes
+
+## 🎯 Current Development Status
+
+### ✅ Completed
+- [x] Next.js 15 setup with TypeScript and Tailwind CSS
+- [x] Jest testing framework with React Testing Library
+- [x] shadcn/ui component system integration
+- [x] TDD methodology and workflow establishment
+- [x] ConversationView component with comprehensive tests
+- [x] Project documentation and artifact structure
+
+### 🚧 In Progress
+- [ ] Message input component development
+- [ ] Streaming message implementation
+- [ ] AI service integration
+
+### 📋 Planned Features
+- [ ] User authentication system
+- [ ] Database integration for conversation persistence
+- [ ] AI model switching functionality
+- [ ] Question evolution tracking
+- [ ] Advanced chat features (reactions, search, export)
+
+## 🤝 Contributing
+
+### Development Workflow
+1. Follow TDD methodology strictly
+2. Write tests before implementation
+3. Use conventional commit messages
+4. Maintain comprehensive documentation
+5. Document sessions in artifacts folder
+
+### Code Quality Standards
+- TypeScript strict mode required
+- 100% test coverage for new components
+- ESLint compliance
+- Accessibility requirements (WCAG guidelines)
+- Responsive design (mobile-first)
+
+## 📚 Documentation
+
+### Development Guides
+- [TDD Workflow](.claude/workflows/tdd-cycle.md)
+- [Code Style Guidelines](.claude/guidelines/code-style.md)
+- [Commit Conventions](.claude/guidelines/commit-conventions.md)
+- [Development Commands](.claude/commands/development.md)
+
+### Session Artifacts
+- [Initial Setup Session](artifacts/sessions/2024-09-15-initial-setup/)
+- [Session Template](artifacts/sessions/session-template.md)
+
+## 🔧 Configuration
+
+### Environment Setup
+Create `.env.local` file for local development:
+```env
+# AI API Keys (when implemented)
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# Database (when implemented)
+DATABASE_URL=your_postgres_url
+```
+
+### IDE Setup
+- VS Code with TypeScript and ESLint extensions
+- Prettier integration for code formatting
+- Jest runner for test execution
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Next.js Team**: For the excellent framework and tooling
+- **shadcn**: For the beautiful and accessible UI component system
+- **Vercel**: For hosting and deployment platform
+- **OpenAI & Anthropic**: For AI model access and capabilities
+
+---
+
+**Repository**: [git@github.com:Sob7i/socratic-dialogue-ai.git](git@github.com:Sob7i/socratic-dialogue-ai.git)
+
+Built with ❤️ using modern web technologies and AI-assisted development.

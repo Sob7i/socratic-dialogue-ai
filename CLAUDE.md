@@ -140,3 +140,54 @@ The project uses shadcn/ui with:
 - `components.json` - shadcn/ui component configuration
 - `jest.config.js` - Jest testing configuration
 - `jest.setup.js` - Jest setup and global test configuration
+
+## Documentation Structure
+
+### Artifacts and Session Tracking
+- `artifacts/sessions/` - Development session documentation
+- `artifacts/decisions/` - Technical decision records
+- `artifacts/research/` - Research notes and analysis
+- `artifacts/templates/` - Templates for components and tests
+
+### Claude AI Assistant Context
+- `.claude/prompts/` - Context and requirement documents
+- `.claude/commands/` - Development command references
+- `.claude/workflows/` - Development workflow guides
+- `.claude/guidelines/` - Code style and commit conventions
+
+### Key Documentation Files
+- `README.md` - Project overview and getting started guide
+- `CLAUDE.md` - This file - AI assistant guidance and project context
+- [TDD Workflow](.claude/workflows/tdd-cycle.md) - Complete TDD methodology guide
+- [Code Style Guidelines](.claude/guidelines/code-style.md) - Coding standards and patterns
+- [Commit Conventions](.claude/guidelines/commit-conventions.md) - Git commit message standards
+- [Development Commands](.claude/commands/development.md) - Available development commands
+- [Artifact Management](.claude/commands/artifacts.md) - Session documentation commands
+
+## Session Management
+
+### Quick Session Commands
+Use these commands to manage development sessions:
+
+```bash
+# Start new session
+start_session "feature-name"
+
+# End session and commit artifacts
+end_session "feature-name"
+
+# Create session artifacts manually
+create_session_artifact "session-name"
+
+# Commit session artifacts
+commit_session_artifacts "session-name"
+```
+
+### Session Documentation Pattern
+Each session should be documented in `artifacts/sessions/YYYY-MM-DD-session-name/`:
+- `session-summary.md` - Complete overview of work done
+- `commits.md` - Git commit analysis and history
+- `decisions.md` - Technical decisions made during session
+- `files-created.md` - Detailed list of files created/modified
+
+For complete session management instructions, see [Artifact Management Commands](.claude/commands/artifacts.md).
