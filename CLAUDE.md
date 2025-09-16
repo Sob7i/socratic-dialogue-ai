@@ -21,6 +21,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Lint**: `npm run lint` - Runs ESLint for code linting
 - **Test**: `npm run test` - Runs Jest test suite
 
+## UI Testing & Quality Assurance
+
+### Playwright Integration
+
+The project includes **Playwright MCP Server** for advanced UI testing and quality assurance:
+
+**Available Capabilities:**
+- **Browser Automation**: Navigate, interact, and test web interfaces
+- **Screenshot Testing**: Capture visual snapshots for UI regression testing
+- **Element Interaction**: Click, type, select, and interact with UI elements
+- **Network Monitoring**: Track requests and responses for debugging
+- **Accessibility Testing**: Verify accessibility compliance and standards
+
+**Common Use Cases:**
+- Take screenshots of chat interface implementations
+- Test responsive design across different viewport sizes
+- Verify user interaction flows (message sending, copying, retrying)
+- Validate accessibility features and ARIA labels
+- Monitor performance and network requests during chat interactions
+
+**Usage Guidelines:**
+- Use Playwright for end-to-end UI testing scenarios
+- Take screenshots when implementing new UI components
+- Verify chat message layouts and styling across devices
+- Test interaction flows to ensure proper UX behavior
+- Always test both light and dark theme variations
+
 ## Development Methodology: Test-Driven Development (TDD)
 
 **CRITICAL: We are following strict TDD methodology:**
@@ -84,17 +111,61 @@ src/
       index.ts
 ```
 
-## UI Component System
+## UI Component System & Design Guidelines
 
-The project uses shadcn/ui with:
-- Style: "new-york" variant
-- Base color: neutral
-- CSS variables enabled for theming
-- Component aliases configured for easy imports:
+The project uses **shadcn/ui** as the primary design system with:
+
+### Configuration
+- **Style**: "new-york" variant
+- **Base color**: neutral
+- **CSS variables**: Enabled for theming
+- **Icon library**: Lucide React
+- **Component aliases** configured for easy imports:
   - `@/components` - General components
-  - `@/components/ui` - UI primitives
-  - `@/lib/utils` - Utility functions
+  - `@/components/ui` - UI primitives (Button, Input, Textarea, Card, etc.)
+  - `@/lib/utils` - Utility functions (including `cn()` for className merging)
   - `@/hooks` - Custom React hooks
+
+### Design System Guidelines
+
+**CRITICAL: Always use shadcn/ui components for consistency:**
+
+1. **UI Components**: Use shadcn/ui components instead of raw HTML elements
+   - `Button` instead of `<button>`
+   - `Input`, `Textarea` instead of `<input>`, `<textarea>`
+   - `Card` for content containers
+   - Import from `@/components/ui/[component-name]`
+
+2. **Chat Interface Styling**:
+   - User messages: Right-aligned, `bg-primary text-primary-foreground`
+   - Assistant messages: Left-aligned, `bg-muted text-foreground`
+   - Message bubbles: `rounded-2xl` with appropriate corner adjustments
+   - Maximum message width: `max-w-[70%]`
+   - Input area: Fixed to bottom with backdrop blur effect
+
+3. **Component Structure**:
+   ```
+   src/components/
+     ui/               # shadcn/ui components
+     ComponentName/    # Custom components
+       ComponentName.tsx
+       ComponentName.test.tsx
+       index.ts
+   ```
+
+4. **Styling Patterns**:
+   - Use `cn()` utility for conditional classes
+   - Follow Tailwind CSS conventions
+   - Prefer semantic color tokens (`primary`, `muted`, `foreground`)
+   - Use consistent spacing (`px-4 py-2` for inputs, `mb-4` for messages)
+   - Implement responsive design with mobile-first approach
+
+### Modern Chat UI Standards
+- **Message Layout**: Flexbox with proper alignment and spacing
+- **Input Design**: Textarea with integrated send button using `Send` icon from Lucide
+- **Action Buttons**: Icon buttons for copy (`Copy`) and retry (`RotateCcw`) actions
+- **Loading States**: Animated dots using CSS animation delays
+- **Accessibility**: Proper ARIA labels and semantic HTML structure
 
 ## Development Guidelines
 

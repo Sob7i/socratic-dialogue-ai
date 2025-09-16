@@ -5,6 +5,9 @@ import React, {
 	KeyboardEvent,
 	ChangeEvent,
 } from 'react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Send } from 'lucide-react'
 
 export interface MessageInputProps {
 	onSendMessage: (content: string) => void
@@ -92,58 +95,61 @@ export function MessageInput({
 	}
 
 	const getCharCountClassName = () => {
-		const baseClass = 'char-count'
-		if (isAtLimit) return `${baseClass} char-count--error`
-		if (isNearLimit) return `${baseClass} char-count--warning`
-		return baseClass
+		if (isAtLimit) return 'text-destructive'
+		if (isNearLimit) return 'text-orange-500'
+		return 'text-muted-foreground'
 	}
 
 	return (
-		<div className="message-input">
-			<div className="message-input__container">
-				<textarea
+		<div className="flex w-full max-w-4xl mx-auto p-4 gap-2 items-end">
+			<div className="flex-1 relative">
+				<Textarea
 					ref={textareaRef}
-					className="message-input__textarea"
+					className="min-h-[2.5rem] max-h-32 pr-12 resize-none"
 					value={value}
 					onChange={handleInputChange}
 					onKeyDown={handleKeyDown}
 					placeholder={placeholder}
 					disabled={isDisabled}
-					rows={multiline ? 3 : 1}
+					rows={1}
 					tabIndex={0}
 					aria-label="Enter your message"
 					maxLength={maxLength}
 				/>
 
-				<button
-					className="message-input__send-button"
+				<Button
+					className="absolute right-2 bottom-2 h-8 w-8 p-0"
 					onClick={handleSendMessage}
 					disabled={isSendDisabled}
 					type="button"
 					tabIndex={0}
 					aria-label="Send message"
+					size="icon"
+					variant={isSendDisabled ? "ghost" : "default"}
 				>
-					Send
-				</button>
+					<Send className="h-4 w-4" />
+				</Button>
 			</div>
 
-			<div className="message-input__footer">
-				{showCharCount && maxLength && (
-					<div
-						className={getCharCountClassName()}
-						aria-live="polite"
-						aria-label={`Character count: ${currentLength} of ${maxLength}`}
-					>
-						{currentLength}/{maxLength}
-					</div>
-				)}
+			{(showCharCount && maxLength) || isDisabled ? (
+				<div className="flex justify-between items-center text-xs text-muted-foreground mt-2 px-2">
+					{showCharCount && maxLength && (
+						<span
+							className={getCharCountClassName()}
+							aria-live="polite"
+							aria-label={`Character count: ${currentLength} of ${maxLength}`}
+						>
+							{currentLength}/{maxLength}
+						</span>
+					)}
 
-				{isDisabled && (
-					<div className="message-input__status" aria-live="polite">
-						Sending...
-					</div>
-				)}
-			</div>
+					{isDisabled && (
+						<span className="text-primary" aria-live="polite">
+							Sending...
+						</span>
+					)}
+				</div>
+			) : null}
 		</div>
 	)
 }
