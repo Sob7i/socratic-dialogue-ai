@@ -39,5 +39,21 @@ git commit -m "commit message"
 - `commit-hash` - Commit message
 - `commit-hash` - Commit message
 
+## Lessons Learned
+### Technical Lessons
+- Key technical insights gained during the session
+- Architecture or design patterns discovered
+- Development methodology improvements
+
+### Workflow Lessons
+- Process improvements identified
+- Tool usage optimizations
+- Communication and documentation insights
+
+### Meta Lessons
+- Learning about learning (e.g., using AI tools effectively)
+- Project organization insights
+- Knowledge management improvements
+
 ## Notes
 Additional notes or observations from the session.

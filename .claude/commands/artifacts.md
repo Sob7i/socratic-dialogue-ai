@@ -191,7 +191,7 @@ start_session "conversation-improvements"
 # (create components, write tests, implement features)
 
 # 3. Update session artifacts as you work
-# Edit artifacts/sessions/2024-09-15-conversation-improvements/session-summary.md
+# Edit artifacts/sessions/2025-09-16-conversation-improvements/session-summary.md
 
 # 4. End session and commit artifacts
 end_session "conversation-improvements"
@@ -215,7 +215,7 @@ commit_session_artifacts "quick-fixes"
 ls artifacts/sessions/
 
 # Edit specific session
-code artifacts/sessions/2024-09-15-initial-setup/session-summary.md
+code artifacts/sessions/2025-09-15-initial-setup/session-summary.md
 
 # Add all artifacts manually
 git add artifacts/ .claude/
