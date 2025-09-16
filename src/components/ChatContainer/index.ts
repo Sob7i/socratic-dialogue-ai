@@ -1,0 +1,1 @@
+export { ChatContainer, type ChatContainerProps } from './ChatContainer'
