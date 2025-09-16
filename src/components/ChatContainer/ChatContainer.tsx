@@ -102,13 +102,14 @@ export function ChatContainer({
 
   return (
     <div
-      className="chat-container"
+      className="flex flex-col h-full max-w-4xl mx-auto w-full"
       data-testid="chat-container"
       data-conversation-id={conversationId}
       role="region"
       aria-label="Chat conversation interface"
     >
-      <div className="chat-container__conversation">
+      {/* Conversation Area */}
+      <div className="flex-1 overflow-hidden">
         <ConversationView
           messages={messages}
           isLoading={isProcessing}
@@ -120,7 +121,8 @@ export function ChatContainer({
         />
       </div>
 
-      <div className="chat-container__input">
+      {/* Input Area - Fixed to bottom */}
+      <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <MessageInput
           onSendMessage={handleSendMessage}
           isDisabled={isProcessing}

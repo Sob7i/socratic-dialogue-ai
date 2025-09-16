@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { Copy, RotateCcw } from 'lucide-react'
 
 export interface Message {
   id: string
@@ -29,7 +31,7 @@ export function ConversationView({
   showMessageActions = false,
   onCopyMessage
 }: ConversationViewProps) {
-  const containerRef = useRef<HTMLElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll functionality
   useEffect(() => {
@@ -55,61 +57,81 @@ export function ConversationView({
     const content = message.content ?? ''
     const role = message.role ?? 'user'
     const status = message.status ?? 'complete'
+    const isUser = role === 'user'
 
     return (
-      <article
+      <div
         key={message.id}
-        className={`message message--${role} ${role === 'user' ? 'user' : 'assistant'}`}
+        className={`flex w-full mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}
         data-role={role}
         data-status={status}
-        aria-label={`${role === 'user' ? 'User' : 'Assistant'} message`}
       >
-        <div className="message__content">
-          {content}
-          {status === 'streaming' && (
-            <>
-              <div
-                data-testid="typing-indicator"
-                aria-label="Typing indicator"
-                role="status"
-                className="typing-indicator"
-              >
-                <span className="typing-dot"></span>
-                <span className="typing-dot"></span>
-                <span className="typing-dot"></span>
+        <div className={`flex flex-col max-w-[70%] ${isUser ? 'items-end' : 'items-start'}`}>
+          {/* Message bubble */}
+          <article
+            className={`
+              px-4 py-2 rounded-2xl text-sm
+              ${isUser
+                ? 'bg-primary text-primary-foreground rounded-br-sm'
+                : 'bg-muted text-foreground rounded-bl-sm'
+              }
+              ${status === 'failed' ? 'ring-2 ring-destructive' : ''}
+            `}
+            aria-label={`${isUser ? 'User' : 'Assistant'} message`}
+          >
+            <div className="whitespace-pre-wrap break-words">
+              {content}
+              {status === 'streaming' && (
+                <div
+                  data-testid="typing-indicator"
+                  aria-label="Typing indicator"
+                  role="status"
+                  className="inline-flex items-center space-x-1 ml-2"
+                >
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </article>
+
+          {/* Message metadata and actions */}
+          <div className={`flex items-center gap-2 mt-1 text-xs text-muted-foreground ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <time>{formatTimestamp(message.timestamp)}</time>
+
+            {/* Action buttons */}
+            {(showMessageActions && status === 'complete' && onCopyMessage) || (status === 'failed' && onRetry) ? (
+              <div className="flex items-center gap-1">
+                {showMessageActions && status === 'complete' && onCopyMessage && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-accent"
+                    onClick={() => onCopyMessage(message.id, message.content)}
+                    aria-label={`Copy message: ${message.content.substring(0, 50)}`}
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                )}
+                {status === 'failed' && onRetry && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-accent text-destructive hover:text-destructive"
+                    onClick={() => onRetry(message.id)}
+                    aria-label={`Retry message: ${message.content.substring(0, 50)}`}
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                  </Button>
+                )}
               </div>
-            </>
-          )}
+            ) : null}
+          </div>
         </div>
-
-        {status === 'failed' && onRetry && (
-          <div role="alert" aria-label="Message failed">
-            <button
-              type="button"
-              onClick={() => onRetry(message.id)}
-              aria-label={`Retry message: ${message.content.substring(0, 50)}`}
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {showMessageActions && status === 'complete' && onCopyMessage && (
-          <div className="message__actions">
-            <button
-              type="button"
-              onClick={() => onCopyMessage(message.id, message.content)}
-              aria-label={`Copy message: ${message.content.substring(0, 50)}`}
-            >
-              Copy
-            </button>
-          </div>
-        )}
-
-        <time className="message__timestamp">
-          {formatTimestamp(message.timestamp)}
-        </time>
-      </article>
+      </div>
     )
   }
 
@@ -124,25 +146,37 @@ export function ConversationView({
   }
 
   return (
-    <main
+    <div
       ref={containerRef}
-      className={containerClassName}
+      className={`flex flex-col px-4 py-6 space-y-1 ${containerClassName}`}
       style={containerStyle}
       aria-label="Conversation messages"
-      role="main"
+      role="region"
       data-auto-scroll={autoScroll?.toString()}
     >
-      {messages.map(renderMessage)}
+      {messages.length === 0 ? (
+        <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+          Start a conversation...
+        </div>
+      ) : (
+        messages.map(renderMessage)
+      )}
 
       {isLoading && (
         <div
           data-testid="conversation-loading"
           aria-label="Loading conversation"
-          className="conversation-loading"
+          className="flex justify-start mb-4"
         >
-          Loading...
+          <div className="max-w-[70%] px-4 py-2 rounded-2xl rounded-bl-sm bg-muted text-foreground text-sm">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
+            </div>
+          </div>
         </div>
       )}
-    </main>
+    </div>
   )
 }
