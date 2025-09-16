@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 
 export interface Message {
   id: string
@@ -11,9 +11,37 @@ export interface Message {
 export interface ConversationViewProps {
   messages: Message[]
   isLoading?: boolean
+  onRetry?: (messageId: string) => void
+  autoScroll?: boolean
+  maxHeight?: string
+  showMessageActions?: boolean
+  onCopyMessage?: (messageId: string, content: string) => void
 }
 
-export function ConversationView({ messages = [], isLoading = false }: ConversationViewProps) {
+export function ConversationView({
+  messages = [],
+  isLoading = false,
+  onRetry,
+  autoScroll,
+  maxHeight,
+  showMessageActions = false,
+  onCopyMessage
+}: ConversationViewProps) {
+  const containerRef = useRef<HTMLElement>(null)
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (autoScroll && containerRef.current) {
+      const container = containerRef.current
+      const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10
+
+      // Only auto-scroll if user hasn't manually scrolled up
+      if (isAtBottom || container.scrollTop === 0) {
+        container.scrollTop = container.scrollHeight
+      }
+    }
+  }, [messages, autoScroll])
+
   const formatTimestamp = (timestamp: Date) => {
     if (!timestamp || isNaN(timestamp.getTime())) {
       return ''
@@ -52,16 +80,26 @@ export function ConversationView({ messages = [], isLoading = false }: Conversat
           )}
         </div>
 
-        {status === 'failed' && (
+        {status === 'failed' && onRetry && (
           <div role="alert" aria-label="Message failed">
             <button
               type="button"
-              onClick={() => {
-                // Retry logic would be handled by parent component
-                console.log('Retry message:', message.id)
-              }}
+              onClick={() => onRetry(message.id)}
+              aria-label={`Retry message: ${message.content.substring(0, 50)}`}
             >
               Retry
+            </button>
+          </div>
+        )}
+
+        {showMessageActions && status === 'complete' && onCopyMessage && (
+          <div className="message__actions">
+            <button
+              type="button"
+              onClick={() => onCopyMessage(message.id, message.content)}
+              aria-label={`Copy message: ${message.content.substring(0, 50)}`}
+            >
+              Copy
             </button>
           </div>
         )}
@@ -73,11 +111,24 @@ export function ConversationView({ messages = [], isLoading = false }: Conversat
     )
   }
 
+  // Generate dynamic class names and styles
+  const containerClassName = [
+    'conversation-view',
+    maxHeight ? 'conversation-view--scrollable' : ''
+  ].filter(Boolean).join(' ')
+
+  const containerStyle: React.CSSProperties = {
+    ...(maxHeight && { maxHeight, overflowY: 'auto' })
+  }
+
   return (
     <main
-      className="conversation-view"
+      ref={containerRef}
+      className={containerClassName}
+      style={containerStyle}
       aria-label="Conversation messages"
       role="main"
+      data-auto-scroll={autoScroll?.toString()}
     >
       {messages.map(renderMessage)}
 
