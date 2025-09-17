@@ -39,7 +39,7 @@ Always respond in a conversational, engaging manner that encourages further expl
 			messages: modelMessages,
 		})
 
-		return result.toTextStreamResponse()
+		return result.toUIMessageStreamResponse()
 	} catch (error) {
 		console.error('Error in chat API:', error)
 		return Response.json(

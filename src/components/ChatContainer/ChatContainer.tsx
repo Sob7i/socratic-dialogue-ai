@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import { ConversationView, Message } from '../ConversationView'
-import { MessageInput } from '../MessageInput'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+
+import { ConversationView, Message } from '../ConversationView'
+import { MessageInput } from '../MessageInput'
 
 export interface ChatContainerProps {
 	conversationId?: string
@@ -16,6 +17,17 @@ export interface ChatContainerProps {
 	onRetry?: (messageId: string) => void
 	onCopyMessage?: (messageId: string, content: string) => void
 	onError?: (error: Error) => void
+}
+
+interface AIMessagePart {
+	type: 'text'
+	text: string
+}
+export interface AIMessage {
+	id: string
+	role: 'user' | 'assistant'
+	parts: AIMessagePart[]
+	createdAt: Date
 }
 
 export function ChatContainer({
@@ -49,8 +61,10 @@ export function ChatContainer({
 
 	// Convert AI SDK messages to our format for compatibility
 	const isLoading = status === 'streaming'
-	const messages = aiMessages.map((msg: any) => {
-		const textPart = msg.parts?.find((part: any) => part.type === 'text')
+	const messages = aiMessages.map((msg: AIMessage) => {
+		const textPart = msg.parts?.find(
+			(part: AIMessagePart) => part.type === 'text'
+		)
 
 		return {
 			id: msg.id,
