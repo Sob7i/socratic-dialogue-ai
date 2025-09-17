@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Copy, RotateCcw } from 'lucide-react'
 
@@ -33,15 +33,19 @@ export function ConversationView({
 }: ConversationViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll functionality
+  // Auto-scroll functionality with streaming optimization
   useEffect(() => {
     if (autoScroll && containerRef.current) {
       const container = containerRef.current
       const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10
 
-      // Only auto-scroll if user hasn't manually scrolled up
-      if (isAtBottom || container.scrollTop === 0) {
-        container.scrollTop = container.scrollHeight
+      // Only auto-scroll if user hasn't manually scrolled up or if currently streaming
+      const hasStreamingMessage = messages.some(msg => msg.status === 'streaming')
+      if (isAtBottom || container.scrollTop === 0 || hasStreamingMessage) {
+        // Use requestAnimationFrame for smooth scrolling during streaming
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight
+        })
       }
     }
   }, [messages, autoScroll])
@@ -53,7 +57,8 @@ export function ConversationView({
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
-  const renderMessage = (message: Message) => {
+  // Memoized message component for performance during streaming
+  const MessageItem = memo(({ message }: { message: Message }) => {
     const content = message.content ?? ''
     const role = message.role ?? 'user'
     const status = message.status ?? 'complete'
@@ -133,7 +138,10 @@ export function ConversationView({
         </div>
       </div>
     )
-  }
+  })
+
+  // Add display name for debugging
+  MessageItem.displayName = 'MessageItem'
 
   // Generate dynamic class names and styles
   const containerClassName = [
@@ -159,7 +167,9 @@ export function ConversationView({
           Start a conversation...
         </div>
       ) : (
-        messages.map(renderMessage)
+        messages.map(message => (
+          <MessageItem key={message.id} message={message} />
+        ))
       )}
 
       {isLoading && (
