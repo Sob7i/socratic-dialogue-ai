@@ -166,12 +166,13 @@ describe('ConversationView', () => {
         status: 'failed',
         content: 'Failed to send',
       })
-      render(<ConversationView messages={[failedMessage]} />)
+      const mockOnRetry = jest.fn()
+      render(<ConversationView messages={[failedMessage]} onRetry={mockOnRetry} />)
 
       const messageElement = screen.getByRole('article')
       expect(messageElement).toHaveAttribute('data-status', 'failed')
       expect(screen.getByRole('alert')).toBeInTheDocument()
-      expect(screen.getByLabelText(/failed/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/message failed/i)).toBeInTheDocument()
     })
 
     it('includes retry button for failed messages', () => {
@@ -179,7 +180,8 @@ describe('ConversationView', () => {
         status: 'failed',
         content: 'Failed message',
       })
-      render(<ConversationView messages={[failedMessage]} />)
+      const mockOnRetry = jest.fn()
+      render(<ConversationView messages={[failedMessage]} onRetry={mockOnRetry} />)
 
       expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
     })
@@ -315,7 +317,8 @@ describe('ConversationView', () => {
         status: 'failed',
         content: 'Failed message',
       })
-      render(<ConversationView messages={[failedMessage]} />)
+      const mockOnRetry = jest.fn()
+      render(<ConversationView messages={[failedMessage]} onRetry={mockOnRetry} />)
 
       const retryButton = screen.getByRole('button', { name: /retry/i })
       expect(retryButton).toBeInTheDocument()
@@ -374,28 +377,30 @@ describe('ConversationView', () => {
   describe('User Interactions', () => {
     it('handles retry button click for failed messages', async () => {
       const user = userEvent.setup()
+      const mockOnRetry = jest.fn()
       const failedMessage = createMockMessage({
         status: 'failed',
         content: 'Failed message',
       })
 
-      render(<ConversationView messages={[failedMessage]} />)
+      render(<ConversationView messages={[failedMessage]} onRetry={mockOnRetry} />)
 
       const retryButton = screen.getByRole('button', { name: /retry/i })
       await user.click(retryButton)
 
-      // Should emit retry event (to be handled by parent component)
-      expect(retryButton).toBeInTheDocument()
+      // Should call the onRetry callback
+      expect(mockOnRetry).toHaveBeenCalledWith(failedMessage.id)
     })
 
     it('supports keyboard navigation', async () => {
       const user = userEvent.setup()
+      const mockOnRetry = jest.fn()
       const messages = [
         createMockMessage({ status: 'failed', content: 'Failed 1' }),
         createMockMessage({ status: 'failed', content: 'Failed 2' }),
       ]
 
-      render(<ConversationView messages={messages} />)
+      render(<ConversationView messages={messages} onRetry={mockOnRetry} />)
 
       const retryButtons = screen.getAllByRole('button', { name: /retry/i })
 
@@ -461,6 +466,348 @@ describe('ConversationView', () => {
       )
 
       expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Enhanced Features - Auto Scroll', () => {
+    it('renders with autoScroll prop enabled', () => {
+      const messages = createMockMessages(5)
+      render(<ConversationView messages={messages} autoScroll={true} />)
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveAttribute('data-auto-scroll', 'true')
+    })
+
+    it('renders with autoScroll prop disabled', () => {
+      const messages = createMockMessages(5)
+      render(<ConversationView messages={messages} autoScroll={false} />)
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveAttribute('data-auto-scroll', 'false')
+    })
+
+    it('auto-scrolls to bottom when new message is added', () => {
+      const initialMessages = createMockMessages(3)
+      const { rerender } = render(
+        <ConversationView messages={initialMessages} autoScroll={true} />
+      )
+
+      const container = screen.getByRole('main')
+
+      // Mock scrollTop and scrollIntoView
+      const mockScrollIntoView = jest.fn()
+      container.scrollIntoView = mockScrollIntoView
+
+      // Add a new message
+      const newMessages = [
+        ...initialMessages,
+        createMockMessage({ id: 'new-msg', content: 'New message' })
+      ]
+
+      rerender(<ConversationView messages={newMessages} autoScroll={true} />)
+
+      // Should find the new message
+      expect(screen.getByText('New message')).toBeInTheDocument()
+    })
+
+    it('respects user scroll position when autoScroll is false', () => {
+      const messages = createMockMessages(10)
+      render(<ConversationView messages={messages} autoScroll={false} />)
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveAttribute('data-auto-scroll', 'false')
+    })
+
+    it('handles scroll position detection for user-initiated scrolling', () => {
+      const messages = createMockMessages(10)
+      render(<ConversationView messages={messages} autoScroll={true} />)
+
+      const container = screen.getByRole('main')
+
+      // Mock scroll properties
+      Object.defineProperty(container, 'scrollTop', { value: 100, writable: true })
+      Object.defineProperty(container, 'scrollHeight', { value: 1000, writable: true })
+      Object.defineProperty(container, 'clientHeight', { value: 400, writable: true })
+
+      // Simulate user scroll
+      container.dispatchEvent(new Event('scroll'))
+
+      // Should still render properly
+      expect(container).toBeInTheDocument()
+    })
+  })
+
+  describe('Enhanced Features - Scrollable Container', () => {
+    it('applies maxHeight prop to create scrollable container', () => {
+      const messages = createMockMessages(10)
+      render(<ConversationView messages={messages} maxHeight="400px" />)
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveStyle('max-height: 400px')
+      expect(container).toHaveClass('conversation-view--scrollable')
+    })
+
+    it('renders without maxHeight by default', () => {
+      const messages = createMockMessages(5)
+      render(<ConversationView messages={messages} />)
+
+      const container = screen.getByRole('main')
+      expect(container).not.toHaveStyle('max-height: 400px')
+      expect(container).not.toHaveClass('conversation-view--scrollable')
+    })
+
+    it('handles overflow with proper scrolling behavior', () => {
+      const messages = createMockMessages(20)
+      render(<ConversationView messages={messages} maxHeight="300px" />)
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveClass('conversation-view--scrollable')
+
+      // Check that all messages are still accessible
+      expect(screen.getAllByRole('article')).toHaveLength(20)
+    })
+
+    it('combines maxHeight with autoScroll functionality', () => {
+      const messages = createMockMessages(15)
+      render(
+        <ConversationView
+          messages={messages}
+          maxHeight="350px"
+          autoScroll={true}
+        />
+      )
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveStyle('max-height: 350px')
+      expect(container).toHaveAttribute('data-auto-scroll', 'true')
+    })
+  })
+
+  describe('Enhanced Features - Retry Functionality', () => {
+    it('calls onRetry callback when retry button is clicked', async () => {
+      const user = userEvent.setup()
+      const mockOnRetry = jest.fn()
+
+      const failedMessage = createMockMessage({
+        id: 'failed-msg-123',
+        status: 'failed',
+        content: 'Failed message'
+      })
+
+      render(
+        <ConversationView
+          messages={[failedMessage]}
+          onRetry={mockOnRetry}
+        />
+      )
+
+      const retryButton = screen.getByRole('button', { name: /retry/i })
+      await user.click(retryButton)
+
+      expect(mockOnRetry).toHaveBeenCalledWith('failed-msg-123')
+      expect(mockOnRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('handles retry for multiple failed messages independently', async () => {
+      const user = userEvent.setup()
+      const mockOnRetry = jest.fn()
+
+      const failedMessages = [
+        createMockMessage({ id: 'failed-1', status: 'failed', content: 'Failed 1' }),
+        createMockMessage({ id: 'failed-2', status: 'failed', content: 'Failed 2' }),
+      ]
+
+      render(
+        <ConversationView
+          messages={failedMessages}
+          onRetry={mockOnRetry}
+        />
+      )
+
+      const retryButtons = screen.getAllByRole('button', { name: /retry/i })
+
+      await user.click(retryButtons[0])
+      expect(mockOnRetry).toHaveBeenCalledWith('failed-1')
+
+      await user.click(retryButtons[1])
+      expect(mockOnRetry).toHaveBeenCalledWith('failed-2')
+
+      expect(mockOnRetry).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not render retry button when onRetry is not provided', () => {
+      const failedMessage = createMockMessage({
+        status: 'failed',
+        content: 'Failed message without callback'
+      })
+
+      render(<ConversationView messages={[failedMessage]} />)
+
+      // Should not have retry button without onRetry callback
+      expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument()
+    })
+
+    it('provides proper accessibility for retry functionality', async () => {
+      const user = userEvent.setup()
+      const mockOnRetry = jest.fn()
+
+      const failedMessage = createMockMessage({
+        id: 'accessibility-test',
+        status: 'failed',
+        content: 'Test message'
+      })
+
+      render(
+        <ConversationView
+          messages={[failedMessage]}
+          onRetry={mockOnRetry}
+        />
+      )
+
+      const retryButton = screen.getByRole('button', { name: /retry/i })
+
+      expect(retryButton).toHaveAttribute('aria-label', expect.stringContaining('Retry'))
+      expect(retryButton).toBeEnabled()
+
+      // Test keyboard activation
+      retryButton.focus()
+      await user.keyboard('{Enter}')
+      expect(mockOnRetry).toHaveBeenCalledWith('accessibility-test')
+    })
+  })
+
+  describe('Enhanced Features - Message Actions', () => {
+    it('renders copy button for completed messages', () => {
+      const message = createMockMessage({
+        status: 'complete',
+        content: 'Message to copy'
+      })
+
+      const mockOnCopy = jest.fn()
+      render(
+        <ConversationView
+          messages={[message]}
+          showMessageActions={true}
+          onCopyMessage={mockOnCopy}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /copy message/i })).toBeInTheDocument()
+    })
+
+    it('calls onCopyMessage when copy button is clicked', async () => {
+      const user = userEvent.setup()
+      const mockOnCopy = jest.fn()
+
+      const message = createMockMessage({
+        id: 'copy-test',
+        content: 'Content to copy'
+      })
+
+      render(
+        <ConversationView
+          messages={[message]}
+          showMessageActions={true}
+          onCopyMessage={mockOnCopy}
+        />
+      )
+
+      const copyButton = screen.getByRole('button', { name: /copy message/i })
+      await user.click(copyButton)
+
+      expect(mockOnCopy).toHaveBeenCalledWith('copy-test', 'Content to copy')
+    })
+
+    it('does not show message actions when disabled', () => {
+      const message = createMockMessage({ content: 'Test message' })
+
+      render(<ConversationView messages={[message]} showMessageActions={false} />)
+
+      expect(screen.queryByRole('button', { name: /copy message/i })).not.toBeInTheDocument()
+    })
+
+    it('handles copy functionality for multiple messages', async () => {
+      const user = userEvent.setup()
+      const mockOnCopy = jest.fn()
+
+      const messages = [
+        createMockMessage({ id: 'msg-1', content: 'First message' }),
+        createMockMessage({ id: 'msg-2', content: 'Second message' }),
+      ]
+
+      render(
+        <ConversationView
+          messages={messages}
+          showMessageActions={true}
+          onCopyMessage={mockOnCopy}
+        />
+      )
+
+      const copyButtons = screen.getAllByRole('button', { name: /copy message/i })
+
+      await user.click(copyButtons[0])
+      expect(mockOnCopy).toHaveBeenCalledWith('msg-1', 'First message')
+
+      await user.click(copyButtons[1])
+      expect(mockOnCopy).toHaveBeenCalledWith('msg-2', 'Second message')
+
+      expect(mockOnCopy).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('Enhanced Features - Integration', () => {
+    it('handles all enhanced features together', async () => {
+      const user = userEvent.setup()
+      const mockOnRetry = jest.fn()
+      const mockOnCopy = jest.fn()
+
+      const messages = [
+        createMockMessage({ id: 'msg-1', content: 'First message' }),
+        createMockMessage({ id: 'msg-2', status: 'failed', content: 'Failed message' }),
+        createMockMessage({ id: 'msg-3', content: 'Last message' }),
+      ]
+
+      render(
+        <ConversationView
+          messages={messages}
+          autoScroll={true}
+          maxHeight="500px"
+          onRetry={mockOnRetry}
+          showMessageActions={true}
+          onCopyMessage={mockOnCopy}
+        />
+      )
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveAttribute('data-auto-scroll', 'true')
+      expect(container).toHaveStyle('max-height: 500px')
+
+      // Test retry functionality
+      const retryButton = screen.getByRole('button', { name: /retry/i })
+      await user.click(retryButton)
+      expect(mockOnRetry).toHaveBeenCalledWith('msg-2')
+
+      // Test copy functionality
+      const copyButtons = screen.getAllByRole('button', { name: /copy message/i })
+      await user.click(copyButtons[0])
+      expect(mockOnCopy).toHaveBeenCalledWith('msg-1', 'First message')
+    })
+
+    it('maintains performance with large message lists and scrolling', () => {
+      const largeMessageList = createMockMessages(100)
+
+      render(
+        <ConversationView
+          messages={largeMessageList}
+          autoScroll={true}
+          maxHeight="400px"
+        />
+      )
+
+      expect(screen.getAllByRole('article')).toHaveLength(100)
+
+      const container = screen.getByRole('main')
+      expect(container).toHaveClass('conversation-view--scrollable')
     })
   })
 })

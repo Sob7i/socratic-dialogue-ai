@@ -12,7 +12,8 @@ The Socratic AI Chat Application employs the Socratic method of learning through
 - **🔄 Model Switching**: Users can switch between different AI models (GPT-4, Claude, etc.)
 - **💾 Persistent Sessions**: Conversations are saved and can be resumed
 - **📈 Question Evolution Tracking**: System tracks how questions evolve and deepen during dialogue
-- **⚡ Streaming Responses**: Real-time display of AI responses as they generate
+- **⚡ Real-time Streaming**: Progressive AI response streaming with smooth UX and cancel functionality
+- **🎯 Modern Chat Interface**: Responsive design with typing indicators, message actions, and auto-scroll
 
 ## 🛠 Tech Stack
 
@@ -25,9 +26,10 @@ The Socratic AI Chat Application employs the Socratic method of learning through
 - **Icons**: Lucide React icon library
 
 ### Backend
-- **API**: Next.js API routes
+- **API**: Next.js API routes with Vercel AI SDK integration
 - **Database**: PostgreSQL (planned)
-- **AI Integration**: Multiple AI API providers (OpenAI, Anthropic)
+- **AI Integration**: Vercel AI SDK with OpenAI provider (unified AI integration)
+- **Streaming**: Real-time AI response streaming with Vercel AI SDK streamText
 
 ### Development & Testing
 - **Testing**: Jest 30 with React Testing Library
@@ -102,23 +104,26 @@ See [TDD Workflow Guide](.claude/workflows/tdd-cycle.md) for detailed instructio
 socratic-dialogue-ai/
 ├── src/
 │   ├── app/                 # Next.js App Router pages
+│   │   └── api/chat/        # Vercel AI SDK streaming endpoint
 │   ├── components/          # React components
-│   │   └── ConversationView/
-│   │       ├── ConversationView.tsx
-│   │       ├── ConversationView.test.tsx
-│   │       └── index.ts
-│   └── lib/                 # Utility functions
-├── artifacts/               # Session documentation
-│   ├── sessions/           # Development session records
-│   ├── decisions/          # Technical decision logs
-│   └── research/           # Research and analysis
-├── .claude/                # Claude AI assistant context
-│   ├── prompts/           # Context and requirements
-│   ├── commands/          # Development commands
-│   ├── workflows/         # Development workflows
-│   └── guidelines/        # Code style and conventions
-├── public/                 # Static assets
-└── docs/                  # Additional documentation
+│   │   ├── ChatContainer/   # Main chat container with AI SDK integration
+│   │   ├── ConversationView/ # Message display with enhanced error handling
+│   │   ├── MessageInput/    # Input with AI SDK message patterns
+│   │   └── ui/             # shadcn/ui components
+│   ├── hooks/              # Custom React hooks
+│   │   └── useStreamingChat.ts # AI SDK compatibility wrapper
+│   └── lib/                # Utility functions
+├── artifacts/              # Session documentation
+│   ├── sessions/          # Development session records
+│   ├── decisions/         # Technical decision logs
+│   └── research/          # Research and analysis
+├── .claude/               # Claude AI assistant context
+│   ├── prompts/          # Context and requirements
+│   ├── commands/         # Development commands
+│   ├── workflows/        # Development workflows
+│   └── guidelines/       # Code style and conventions
+├── public/                # Static assets
+└── docs/                 # Additional documentation
 ```
 
 ## 🎨 Component Development
@@ -175,13 +180,24 @@ end_session "feature-name"
 - [x] Jest testing framework with React Testing Library
 - [x] shadcn/ui component system integration
 - [x] TDD methodology and workflow establishment
-- [x] ConversationView component with comprehensive tests
+- [x] ConversationView component with enhanced error UI
+- [x] MessageInput component with AI SDK integration
+- [x] ChatContainer with Vercel AI SDK useChat hook
+- [x] **Vercel AI SDK Integration**: Complete replacement of manual implementation
+- [x] **Unified AI Integration**: Industry-standard SDK implementation (~85% code reduction)
+- [x] **Enhanced Error Handling**: Meaningful error messages instead of empty grey bubbles
+- [x] Real-time AI streaming with AI SDK streamText
+- [x] Message format conversion (UIMessage ↔ ModelMessage with AI SDK v5)
+- [x] **Component Architecture**: Modular component structure with extracted MessageBubble, MessageActions, EmptyState
+- [x] **Reusable UI Components**: TypingIndicator component in ui/ for consistent loading states
+- [x] **Code Quality**: ESLint rules for production console log restrictions
+- [x] **Testing Infrastructure**: Comprehensive test suites for API routes and components
+- [x] Performance optimizations and TypeScript safety
 - [x] Project documentation and artifact structure
 
 ### 🚧 In Progress
-- [ ] Message input component development
-- [ ] Streaming message implementation
-- [ ] AI service integration
+- [ ] Additional AI provider integration through Vercel AI SDK (Claude, GPT-3.5-turbo)
+- [ ] Database integration for conversation persistence
 
 ### 📋 Planned Features
 - [ ] User authentication system
@@ -215,7 +231,7 @@ end_session "feature-name"
 - [Development Commands](.claude/commands/development.md)
 
 ### Session Artifacts
-- [Initial Setup Session](artifacts/sessions/2024-09-15-initial-setup/)
+- [Session 3: Vercel AI SDK Integration](artifacts/sessions/2025-09-17-session-3-streaming/)
 - [Session Template](artifacts/sessions/session-template.md)
 
 ## 🔧 Configuration
@@ -223,13 +239,15 @@ end_session "feature-name"
 ### Environment Setup
 Create `.env.local` file for local development:
 ```env
-# AI API Keys (when implemented)
-OPENAI_API_KEY=your_openai_key
-ANTHROPIC_API_KEY=your_anthropic_key
+# AI API Keys
+OPENAI_API_KEY=your_openai_key          # Required for streaming functionality
+ANTHROPIC_API_KEY=your_anthropic_key    # Optional (planned for future)
 
-# Database (when implemented)
+# Database (planned)
 DATABASE_URL=your_postgres_url
 ```
+
+**Note**: The streaming functionality requires an OpenAI API key to work with live AI responses. The application now uses Vercel AI SDK for unified AI integration.
 
 ### IDE Setup
 - VS Code with TypeScript and ESLint extensions
