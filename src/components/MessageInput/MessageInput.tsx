@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Send } from 'lucide-react'
+import { Send, X } from 'lucide-react'
 
 export interface MessageInputProps {
 	onSendMessage: (content: string) => void
@@ -16,6 +16,7 @@ export interface MessageInputProps {
 	maxLength?: number
 	multiline?: boolean
 	showCharCount?: boolean
+	onCancelStream?: () => void
 }
 
 export function MessageInput({
@@ -25,6 +26,7 @@ export function MessageInput({
 	maxLength = 2000,
 	multiline = false,
 	showCharCount = false,
+	onCancelStream,
 }: MessageInputProps) {
 	const [value, setValue] = useState('')
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -117,18 +119,33 @@ export function MessageInput({
 					maxLength={maxLength}
 				/>
 
-				<Button
-					className="absolute right-2 bottom-2 h-8 w-8 p-0"
-					onClick={handleSendMessage}
-					disabled={isSendDisabled}
-					type="button"
-					tabIndex={0}
-					aria-label="Send message"
-					size="icon"
-					variant={isSendDisabled ? "ghost" : "default"}
-				>
-					<Send className="h-4 w-4" />
-				</Button>
+				{/* Show cancel button when streaming, send button otherwise */}
+				{onCancelStream ? (
+					<Button
+						className="absolute right-2 bottom-2 h-8 w-8 p-0"
+						onClick={onCancelStream}
+						type="button"
+						tabIndex={0}
+						aria-label="Cancel streaming"
+						size="icon"
+						variant="destructive"
+					>
+						<X className="h-4 w-4" />
+					</Button>
+				) : (
+					<Button
+						className="absolute right-2 bottom-2 h-8 w-8 p-0"
+						onClick={handleSendMessage}
+						disabled={isSendDisabled}
+						type="button"
+						tabIndex={0}
+						aria-label="Send message"
+						size="icon"
+						variant={isSendDisabled ? "ghost" : "default"}
+					>
+						<Send className="h-4 w-4" />
+					</Button>
+				)}
 			</div>
 
 			{(showCharCount && maxLength) || isDisabled ? (

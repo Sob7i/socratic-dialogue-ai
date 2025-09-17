@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { ConversationView, Message } from '../ConversationView'
 import { MessageInput } from '../MessageInput'
+import { useStreamingChat } from '@/hooks/useStreamingChat'
 
 export interface ChatContainerProps {
   conversationId?: string
@@ -27,13 +28,33 @@ export function ChatContainer({
   onCopyMessage,
   onError
 }: ChatContainerProps) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
-  const [isProcessing, setIsProcessing] = useState(false)
+  // Use streaming chat hook instead of local state
+  const {
+    messages: streamingMessages,
+    sendMessage: sendStreamingMessage,
+    isStreaming,
+    streamError,
+    retryMessage,
+    cancelStream
+  } = useStreamingChat()
 
-  // Generate unique message ID
-  const generateMessageId = useCallback(() => {
-    return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
-  }, [])
+  // Convert streaming messages to regular messages for compatibility
+  const messages = streamingMessages.map(msg => ({
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+    status: msg.status,
+    timestamp: msg.timestamp
+  }))
+
+  const isProcessing = isStreaming
+
+  // Handle streaming errors
+  React.useEffect(() => {
+    if (streamError && onError) {
+      onError(streamError)
+    }
+  }, [streamError, onError])
 
   // Handle sending a new message
   const handleSendMessage = useCallback(async (content: string) => {
@@ -41,36 +62,41 @@ export function ChatContainer({
       return
     }
 
-    const newMessage: Message = {
-      id: generateMessageId(),
-      role: 'user',
-      content: content.trim(),
-      status: 'complete',
-      timestamp: new Date()
-    }
-
     try {
-      setIsProcessing(true)
-      setMessages(prevMessages => [...prevMessages, newMessage])
+      // Send message using streaming hook
+      await sendStreamingMessage(content.trim())
+
+      // Create a message object for parent notification
+      const newMessage: Message = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'user',
+        content: content.trim(),
+        status: 'complete',
+        timestamp: new Date()
+      }
 
       // Notify parent component of new message
       onMessageSent?.(newMessage)
 
-      // Simulate brief processing delay (in real app, this would be AI response)
-      await new Promise(resolve => setTimeout(resolve, 100))
-
     } catch (error) {
       console.error('Error sending message:', error)
       onError?.(error as Error)
-    } finally {
-      setIsProcessing(false)
     }
-  }, [isProcessing, generateMessageId, onMessageSent, onError])
+  }, [isProcessing, sendStreamingMessage, onMessageSent, onError])
 
   // Handle retry functionality
-  const handleRetry = useCallback((messageId: string) => {
-    onRetry?.(messageId)
-  }, [onRetry])
+  const handleRetry = useCallback(async (messageId: string) => {
+    try {
+      // Use streaming hook's retry functionality
+      await retryMessage(messageId)
+
+      // Also call parent's onRetry if provided
+      onRetry?.(messageId)
+    } catch (error) {
+      console.error('Error retrying message:', error)
+      onError?.(error as Error)
+    }
+  }, [retryMessage, onRetry, onError])
 
   // Handle copy message functionality
   const handleCopyMessage = useCallback(async (messageId: string, content: string) => {
@@ -130,6 +156,7 @@ export function ChatContainer({
           multiline={true}
           showCharCount={true}
           maxLength={2000}
+          onCancelStream={isStreaming ? cancelStream : undefined}
         />
       </div>
     </div>
