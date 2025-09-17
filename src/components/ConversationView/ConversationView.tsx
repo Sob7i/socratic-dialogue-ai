@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, memo } from 'react'
+
 import { MessageBubble } from './MessageBubble'
 import { MessageActions } from './MessageActions'
 import { EmptyState } from './EmptyState'

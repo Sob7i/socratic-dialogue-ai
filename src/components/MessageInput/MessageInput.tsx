@@ -5,9 +5,10 @@ import React, {
 	KeyboardEvent,
 	ChangeEvent,
 } from 'react'
+import { Send, X } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Send, X } from 'lucide-react'
 
 export interface MessageInputProps {
 	onSendMessage: (content: string) => void
