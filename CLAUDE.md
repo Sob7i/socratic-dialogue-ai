@@ -262,3 +262,5 @@ Each session should be documented in `artifacts/sessions/YYYY-MM-DD-session-name
 - `files-created.md` - Detailed list of files created/modified
 
 For complete session management instructions, see [Artifact Management Commands](.claude/commands/artifacts.md).
+- update the context document to inlcude updating the active session files after every development iteration
+- update README.md file when needed too after every development iteration
